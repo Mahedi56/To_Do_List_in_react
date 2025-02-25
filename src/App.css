@@ -1,0 +1,16 @@
+.Container{
+    width: 400px ;
+    background-color: #0c2d48;
+    text-align: center;
+    color: aliceblue;
+    position: absolute;
+    padding-bottom: 1rem;
+}
+.inpttk{
+  width: 250px;
+  margin: auto;
+  position: relative;
+}
+.inpttk input{
+  padding: 10px;
+}
