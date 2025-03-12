@@ -1,39 +1,55 @@
-import React, { useState } from "react";
+import React from "react";
 import { MdDeleteSweep } from "react-icons/md";
 
 interface ListShowProps {
-  list_item: string[];
+  list_item: {
+    [id: string]: {
+      isCompleted: boolean;
+      item: string;
+    };
+  };
   deletetodo: (task: string) => void;
+  strikeTodo: (task: string) => void;
 }
 
-const List_show: React.FC<ListShowProps> = ({ list_item,deletetodo }) => {
-  const [checkedItems, setCheckedItems] = useState<boolean[]>(new Array(list_item.length).fill(false));
-  
-  const handlechange = (index: number) => {
-    const newCheckedItems = [...checkedItems]; 
-    newCheckedItems[index] = !newCheckedItems[index]; 
-    setCheckedItems(newCheckedItems); 
-  };
-  const handledelete = (it:string) => {
+const ListShow: React.FC<ListShowProps> = ({
+  list_item,
+  deletetodo,
+  strikeTodo,
+}) => {
+  const handledelete = (it: string) => {
     deletetodo(it);
+  };
+  const handlestrikeTodo = (it: string) => {
+    strikeTodo(it);
   };
   return (
     <>
-      {list_item.map((list, index) => (
-        <li key={index} style={{ display: "flex" }}>
-          <input 
-            type="checkbox" 
-            checked={checkedItems[index]} 
-            onChange={() => handlechange(index)} 
+      {Object.keys(list_item).map((keyitem) => (
+        <li key={keyitem} style={{ display: "flex" }}>
+          <input
+            type="checkbox"
+            checked={list_item[keyitem].isCompleted}
+            onChange={() => handlestrikeTodo(keyitem)}
           />
-          <p style={{ textDecoration: checkedItems[index] ? "line-through" : "none" }}>
-            {list}
-          </p>
-          <MdDeleteSweep onClick={()=>handledelete(list)} style={{ cursor: "pointer" }} className="delete_icon"/>
-          </li>
+          <span
+            style={{
+              textDecoration: list_item[keyitem].isCompleted
+                ? "line-through"
+                : "none",
+            }}
+          >
+            {list_item[keyitem].item}
+          </span>
+          <MdDeleteSweep
+            onClick={() => handledelete(keyitem)}
+            style={{ cursor: "pointer" }}
+            className="delete_icon"
+          />
+        </li>
       ))}
     </>
   );
 };
 
-export default List_show;
+export default ListShow;

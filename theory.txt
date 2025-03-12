@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import TodoInput from "./assets/Component/todo-input";
+//import { useNavigate } from "react-router-dom";
+import Taking_input from "./assets/Component/Taking_input";
 import List_show from "./assets/Component/List_show";
 import { nanoid } from "nanoid";
 
@@ -10,13 +11,12 @@ type ToDoListData = {
   };
 };
 
-const baseURL = `http://${window.location.hostname}:5001/`;
-
 const App = () => {
   const [list, setList] = useState<ToDoListData>({});
   const [user, setUser] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  //const navigate = useNavigate();
 
   useEffect(() => {
     const savedUserId = localStorage.getItem("userId");
@@ -29,7 +29,7 @@ const App = () => {
     if (user) {
       const fetchTodos = async () => {
         try {
-          const response = await fetch(`${baseURL}todos?user-id=${user}`, {
+          const response = await fetch("http://localhost:5001/todos", {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -37,16 +37,10 @@ const App = () => {
           });
           const data = await response.json();
           const formattedData: ToDoListData = Object.fromEntries(
-            data.map(
-              (todo: {
-                id: string;
-                todo_item: string;
-                is_completed: boolean;
-              }) => [
-                todo.id,
-                { item: todo.todo_item, isCompleted: todo.is_completed },
-              ]
-            )
+            data.map((todo: { id: string; todo_item: string; is_completed: boolean }) => [
+              todo.id,
+              { item: todo.todo_item, isCompleted: todo.is_completed },
+            ])
           );
           setList(formattedData);
         } catch (error) {
@@ -60,7 +54,7 @@ const App = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch(`${baseURL}login?user-id=${user}`, {
+      const response = await fetch("http://localhost:5001/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -72,12 +66,11 @@ const App = () => {
       console.log(response.body);
       const data = await response.json();
       console.log(data);
-
+      
       if (data.userId) {
         setUser(data.userId);
-        localStorage.setItem("userId", data.userId);
-        console.log("data.userId",data.userId);
-        
+        localStorage.setItem("userId", data.userId); // Save userId in localStorage
+        //navigate("/todos");
       } else {
         alert("Login failed");
       }
@@ -87,23 +80,24 @@ const App = () => {
   };
 
   const handleLogout = () => {
-    setEmail("");
+    setEmail(""); 
     setPassword("");
     setUser(null);
     localStorage.removeItem("userId");
+    //navigate("/");
   };
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleLogin();
   };
 
-  const handleTodoSubmit = async (inpt: string) => {
+  const getInput = async (inpt: string) => {
     const id = nanoid();
     const newItem = { id, todo_item: inpt, is_completed: false };
 
     try {
-      const response = await fetch(`${baseURL}itemInsert?user-id=${user}`, {
+      const response = await fetch("http://localhost:5001/itemInsert", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -126,7 +120,7 @@ const App = () => {
 
   const handleDeleteItem = async (itemId: string) => {
     try {
-      await fetch(`${baseURL}todos/${itemId}?user-id=${user}`, {
+      await fetch(`http://localhost:5001/todos/${itemId}`, {
         method: "DELETE",
       });
 
@@ -142,7 +136,7 @@ const App = () => {
     const updatedStatus = !list[itemId].isCompleted;
 
     try {
-      await fetch(`${baseURL}todos/${itemId}?user-id=${user}`, {
+      await fetch(`http://localhost:5001/todos/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -163,10 +157,10 @@ const App = () => {
   };
 
   return (
-    <div>
+    <div className="Container">
       {!user ? (
-        <div className="Container_login">
-          <form onSubmit={handleLoginSubmit}>
+        <div>
+          <form onSubmit={handleSubmit}>
             <input
               type="email"
               placeholder="Email"
@@ -183,21 +177,15 @@ const App = () => {
           </form>
         </div>
       ) : (
-        <div className="Container">
+        <div>
           <h1>To Do List</h1>
-          <button
-            id="signout"
-            style={{ cursor: "pointer" }}
-            onClick={handleLogout}
-          >
-            Sign Out
-          </button>
+          <button style={{cursor:"pointer"}} onClick={handleLogout}>Sign Out</button>
           <List_show
             list_item={list}
             deletetodo={handleDeleteItem}
             strikeTodo={handleCrossoutItem}
           />
-          <TodoInput onSubmit={handleTodoSubmit} />
+          <Taking_input getInput={getInput} />
         </div>
       )}
     </div>
@@ -205,3 +193,6 @@ const App = () => {
 };
 
 export default App;
+
+
+
