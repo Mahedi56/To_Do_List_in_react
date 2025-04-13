@@ -14,3 +14,64 @@
 .inpttk input{
   padding: 10px;
 }
+
+.Container_login{
+    width: 400px ;
+    background-color: #0c2d48;
+    text-align: center;
+    color: aliceblue;
+    position: absolute;
+    padding: 2rem;
+}
+.Container_login form{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+.Container_login input{
+    padding: 10px;
+    margin: 10px;
+    width: 250px;
+    border: none;
+}
+.Container_login button{
+    width: 100px;
+    padding: 10px;
+    margin: 10px;
+    background-color: #f5f5f5;
+    color: #0c2d48;
+    border: none;
+    cursor: pointer;
+}
+.Container_login button:hover{
+    background-color: #3680bd;
+    color: #f5f5f5;
+    font-weight: bold;
+}
+#signout:hover{
+    background-color: #b44848;
+    color: #e4e7ea;
+    cursor: pointer;
+}
+
+#signup-container{
+    width: 400px ;
+    background-color: #0c2d48;
+    text-align: center;
+    color: aliceblue;
+    position: absolute;
+    padding: 2rem;
+}
+#signup-container form{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+#signup-container input{
+    padding: 10px;
+    margin: 10px;
+    width: 250px;
+    border: none;
+}

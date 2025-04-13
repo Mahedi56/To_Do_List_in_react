@@ -1,0 +1,198 @@
+import { useEffect, useState } from "react";
+//import { useNavigate } from "react-router-dom";
+import Taking_input from "./assets/Component/Taking_input";
+import List_show from "./assets/Component/List_show";
+import { nanoid } from "nanoid";
+
+type ToDoListData = {
+  [id: string]: {
+    isCompleted: boolean;
+    item: string;
+  };
+};
+
+const App = () => {
+  const [list, setList] = useState<ToDoListData>({});
+  const [user, setUser] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  //const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedUserId = localStorage.getItem("userId");
+    if (savedUserId) {
+      setUser(savedUserId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      const fetchTodos = async () => {
+        try {
+          const response = await fetch("http://localhost:5001/todos", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          const data = await response.json();
+          const formattedData: ToDoListData = Object.fromEntries(
+            data.map((todo: { id: string; todo_item: string; is_completed: boolean }) => [
+              todo.id,
+              { item: todo.todo_item, isCompleted: todo.is_completed },
+            ])
+          );
+          setList(formattedData);
+        } catch (error) {
+          console.error("Error fetching todos:", error);
+        }
+      };
+
+      fetchTodos();
+    }
+  }, [user]);
+
+  const handleLogin = async () => {
+    try {
+      const response = await fetch("http://localhost:5001/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, pass: password }),
+      });
+      console.log(response);
+      console.log(response.headers);
+      console.log(response.body);
+      const data = await response.json();
+      console.log(data);
+      
+      if (data.userId) {
+        setUser(data.userId);
+        localStorage.setItem("userId", data.userId); // Save userId in localStorage
+        //navigate("/todos");
+      } else {
+        alert("Login failed");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+    }
+  };
+
+  const handleLogout = () => {
+    setEmail(""); 
+    setPassword("");
+    setUser(null);
+    localStorage.removeItem("userId");
+    //navigate("/");
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleLogin();
+  };
+
+  const getInput = async (inpt: string) => {
+    const id = nanoid();
+    const newItem = { id, todo_item: inpt, is_completed: false };
+
+    try {
+      const response = await fetch("http://localhost:5001/itemInsert", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newItem),
+      });
+
+      const data = await response.json();
+      setList((prevList) => ({
+        ...prevList,
+        [data.id]: {
+          item: data.todo_item,
+          isCompleted: data.is_completed,
+        },
+      }));
+    } catch (error) {
+      console.error("Error adding todo:", error);
+    }
+  };
+
+  const handleDeleteItem = async (itemId: string) => {
+    try {
+      await fetch(`http://localhost:5001/todos/${itemId}`, {
+        method: "DELETE",
+      });
+
+      const newList = { ...list };
+      delete newList[itemId];
+      setList(newList);
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+    }
+  };
+
+  const handleCrossoutItem = async (itemId: string) => {
+    const updatedStatus = !list[itemId].isCompleted;
+
+    try {
+      await fetch(`http://localhost:5001/todos/${itemId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ is_completed: updatedStatus }),
+      });
+
+      setList((prevList) => ({
+        ...prevList,
+        [itemId]: {
+          ...prevList[itemId],
+          isCompleted: updatedStatus,
+        },
+      }));
+    } catch (error) {
+      console.error("Error updating todo:", error);
+    }
+  };
+
+  return (
+    <div className="Container">
+      {!user ? (
+        <div>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="email"
+              placeholder="Email"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
+            />
+            <button type="submit">Login</button>
+          </form>
+        </div>
+      ) : (
+        <div>
+          <h1>To Do List</h1>
+          <button style={{cursor:"pointer"}} onClick={handleLogout}>Sign Out</button>
+          <List_show
+            list_item={list}
+            deletetodo={handleDeleteItem}
+            strikeTodo={handleCrossoutItem}
+          />
+          <Taking_input getInput={getInput} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default App;
+
+
+
