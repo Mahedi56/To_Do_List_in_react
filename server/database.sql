@@ -12,6 +12,10 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE NOT NULL,  
     pass TEXT NOT NULL
 );
+ALTER TABLE users
+ADD COLUMN first_name VARCHAR(255),
+ADD COLUMN last_name VARCHAR(255);
+
 
 CREATE TABLE usersAlternate (
     row_id SERIAL PRIMARY KEY,

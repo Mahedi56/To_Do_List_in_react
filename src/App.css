@@ -55,3 +55,23 @@
     cursor: pointer;
 }
 
+#signup-container{
+    width: 400px ;
+    background-color: #0c2d48;
+    text-align: center;
+    color: aliceblue;
+    position: absolute;
+    padding: 2rem;
+}
+#signup-container form{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+#signup-container input{
+    padding: 10px;
+    margin: 10px;
+    width: 250px;
+    border: none;
+}
